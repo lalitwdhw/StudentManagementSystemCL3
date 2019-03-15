@@ -16,6 +16,7 @@ import android.view.View;
 import android.widget.LinearLayout;
 
 import com.cl.studentmanagementsystemcl3.Adapter.StudentRecyclerAdapter;
+import com.cl.studentmanagementsystemcl3.CheckSizeInterface;
 import com.cl.studentmanagementsystemcl3.Constants;
 import com.cl.studentmanagementsystemcl3.Models.Student;
 import com.cl.studentmanagementsystemcl3.R;
@@ -26,7 +27,7 @@ import java.util.Comparator;
 
 import io.paperdb.Paper;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements CheckSizeInterface {
 
     private RecyclerView recyclerView;
     private LinearLayout llNodata;
@@ -73,7 +74,7 @@ public class MainActivity extends AppCompatActivity {
             editor.putBoolean(Constants.IS_GRID,isGrid);
             editor.apply();
 
-            mStudentRecycelerAdapter = new StudentRecyclerAdapter(mStudentList, MainActivity.this);
+            mStudentRecycelerAdapter = new StudentRecyclerAdapter(mStudentList, MainActivity.this,this);
             RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(MainActivity.this)
             {
                 @Override
@@ -104,7 +105,7 @@ public class MainActivity extends AppCompatActivity {
             editor.putBoolean(Constants.IS_GRID,isGrid);
             editor.apply();
 
-            mStudentRecycelerAdapter = new StudentRecyclerAdapter(mStudentList, MainActivity.this);
+            mStudentRecycelerAdapter = new StudentRecyclerAdapter(mStudentList, MainActivity.this,this);
             RecyclerView.LayoutManager mLayoutManager = new GridLayoutManager(MainActivity.this,2)
             {
                 @Override
@@ -205,5 +206,11 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         mStudentRecycelerAdapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public void sizeZero() {
+        recyclerView.setVisibility(View.GONE);
+        llNodata.setVisibility(View.VISIBLE);
     }
 }

@@ -1,5 +1,6 @@
 package com.cl.studentmanagementsystemcl3.Activity;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
@@ -24,6 +25,7 @@ public class AddStudentActivity extends AppCompatActivity {
     private Button btnSave;
     private boolean isEditing = false;
     private int editingSystemId = -1;
+    private boolean isSuccesfullyAdded = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,6 +78,19 @@ public class AddStudentActivity extends AppCompatActivity {
 
     public void saveStudentDetails()
     {
+        if(etName.getText().toString().trim().length() == 0)
+        {
+            Toast.makeText(AddStudentActivity.this,getString(R.string.name_check),Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+
+        if(etId.getText().toString().trim().length() == 0)
+        {
+            Toast.makeText(AddStudentActivity.this,getString(R.string.id_check),Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         Paper.init(AddStudentActivity.this);
         new saveToPaper().execute(etName.getText().toString(),etId.getText().toString());
     }
@@ -92,6 +107,15 @@ public class AddStudentActivity extends AppCompatActivity {
                         new Student(params[0],
                                 Integer.valueOf(params[1]),
                                 existingStudents.size()+1);
+
+                for(int i = 0; i < existingStudents.size();i++)
+                {
+                    if(existingStudents.get(i).getStudentId() == Integer.valueOf(params[1]))
+                    {
+                        isSuccesfullyAdded = false;
+                        return null;
+                    }
+                }
                 existingStudents.add(mStudent);
                 Paper.book().write(Constants.STUDENT_DB,existingStudents);
             }
@@ -118,19 +142,23 @@ public class AddStudentActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
+            if(isSuccesfullyAdded) {
 
-            if(!isEditing)
-            {
-                Toast.makeText(AddStudentActivity.this,getString(R.string.student_added),Toast.LENGTH_SHORT).show();
+                if (!isEditing) {
+                    Toast.makeText(AddStudentActivity.this, getString(R.string.student_added), Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(AddStudentActivity.this, getString(R.string.student_updated), Toast.LENGTH_SHORT).show();
+                }
+
+                Intent intent = new Intent(AddStudentActivity.this, MainActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
             }
             else
             {
-                Toast.makeText(AddStudentActivity.this,getString(R.string.student_updated),Toast.LENGTH_SHORT).show();
+                isSuccesfullyAdded = true;
+                Toast.makeText(AddStudentActivity.this,getString(R.string.unique_id_check), Toast.LENGTH_SHORT).show();
             }
-
-            Intent intent = new Intent(AddStudentActivity.this,MainActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            startActivity(intent);
         }
     }
 

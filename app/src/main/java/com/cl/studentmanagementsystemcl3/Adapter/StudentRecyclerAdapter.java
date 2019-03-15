@@ -13,6 +13,7 @@ import android.widget.TextView;
 
 import com.cl.studentmanagementsystemcl3.Activity.AddStudentActivity;
 import com.cl.studentmanagementsystemcl3.Activity.MainActivity;
+import com.cl.studentmanagementsystemcl3.CheckSizeInterface;
 import com.cl.studentmanagementsystemcl3.Constants;
 import com.cl.studentmanagementsystemcl3.Models.Student;
 import com.cl.studentmanagementsystemcl3.R;
@@ -26,6 +27,7 @@ public class StudentRecyclerAdapter extends RecyclerView.Adapter<StudentRecycler
 
     private List<Student> studentList;
     private Activity activity;
+    private CheckSizeInterface sz;
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
 
@@ -43,9 +45,10 @@ public class StudentRecyclerAdapter extends RecyclerView.Adapter<StudentRecycler
     }
 
 
-    public StudentRecyclerAdapter(List<Student> moviesList, Activity activity) {
+    public StudentRecyclerAdapter(List<Student> moviesList, Activity activity, CheckSizeInterface dt) {
         this.studentList = moviesList;
         this.activity = activity;
+        this.sz = dt;
     }
 
     @Override
@@ -116,6 +119,10 @@ public class StudentRecyclerAdapter extends RecyclerView.Adapter<StudentRecycler
                 notifyItemRangeChanged(position,studentList.size());
                 new deleteFromPaper().execute(position);
                 dialog.dismiss();
+                if(studentList.size() == 0)
+                {
+                    sz.sizeZero();
+                }
             }
         });
 

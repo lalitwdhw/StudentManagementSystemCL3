@@ -14,4 +14,7 @@
     <string name="grid_list">Grid/List</string>
     <string name="sort_by_id">Sort By Id</string>
     <string name="sort_by_name">Sort By Name</string>
+    <string name="name_check">Name is compulsory</string>
+    <string name="id_check">Id is compulsory</string>
+    <string name="unique_id_check">Enter Unique ID only</string>
 </resources>
