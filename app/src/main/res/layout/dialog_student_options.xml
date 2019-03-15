@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/tvView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="@dimen/dimen_text_size"
+        android:text="@string/view"
+        android:gravity="center_horizontal"
+        android:background="@color/colorPrimaryDark"
+        android:textColor="@color/color_white"
+        android:layout_margin="@dimen/dimen_card_margin"/>
+
+
+    <TextView
+        android:id="@+id/tvEdit"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="@dimen/dimen_text_size"
+        android:text="@string/edit"
+        android:gravity="center_horizontal"
+        android:background="@color/colorPrimaryDark"
+        android:textColor="@color/color_white"
+        android:layout_margin="@dimen/dimen_card_margin"/>
+    <TextView
+        android:id="@+id/tvDelete"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="@dimen/dimen_text_size"
+        android:text="@string/delete"
+        android:gravity="center_horizontal"
+        android:background="@color/colorPrimaryDark"
+        android:textColor="@color/color_white"
+        android:layout_margin="@dimen/dimen_card_margin"/>
+
+
+</LinearLayout>

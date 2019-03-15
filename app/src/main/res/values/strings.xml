@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">StudentManagementSystemCL3</string>
+    <string name="no_data">No Data</string>
+    <string name="add_student">Add Student</string>
+    <string name="enter_roll_number">Enter Roll Number</string>
+    <string name="enter_name">Enter Name</string>
+    <string name="save_student_details">Save Student Details</string>
+    <string name="student_added">Student Successfully Added</string>
+    <string name="student_updated">Student Successfully Updated</string>
+    <string name="delete">Delete</string>
+    <string name="edit">Edit</string>
+    <string name="view">View</string>
+    <string name="choose_option">Choose and Option...</string>
+    <string name="grid_list">Grid/List</string>
+    <string name="sort_by_id">Sort By Id</string>
+    <string name="sort_by_name">Sort By Name</string>
+</resources>
