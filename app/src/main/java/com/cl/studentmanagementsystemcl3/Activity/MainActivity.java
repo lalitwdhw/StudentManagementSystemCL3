@@ -1,5 +1,6 @@
 package com.cl.studentmanagementsystemcl3.Activity;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
@@ -14,6 +15,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import com.cl.studentmanagementsystemcl3.Adapter.StudentRecyclerAdapter;
 import com.cl.studentmanagementsystemcl3.CheckSizeInterface;
@@ -25,16 +27,15 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
-import io.paperdb.Paper;
-
 public class MainActivity extends AppCompatActivity implements CheckSizeInterface {
 
     private RecyclerView recyclerView;
     private LinearLayout llNodata;
-    private ArrayList<Student> mStudentList = new ArrayList<>();
+    private static ArrayList<Student> mStudentList = new ArrayList<>();
     private StudentRecyclerAdapter mStudentRecycelerAdapter;
     private boolean isGrid = false;
     private SharedPreferences pref;
+    boolean isSuccesfullyAdded = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,8 +47,14 @@ public class MainActivity extends AppCompatActivity implements CheckSizeInterfac
         pref = getApplicationContext().getSharedPreferences( Constants.PREFS, 0);
         isGrid = pref.getBoolean(Constants.IS_GRID,false);
 
-        Paper.init(MainActivity.this);
-        new readFromPaper().execute();
+        if(!isGrid)
+        {
+            setRecycler();
+        }
+        else
+        {
+            setRecyclerGrid();
+        }
     }
 
     private void init()
@@ -121,29 +128,7 @@ public class MainActivity extends AppCompatActivity implements CheckSizeInterfac
 
     public void addStudent(View view)
     {
-        startActivity(new Intent(MainActivity.this,AddStudentActivity.class));
-    }
-
-    private class readFromPaper extends AsyncTask<Void, Void, Void> {
-
-        @Override
-        protected Void doInBackground(Void... params) {
-            mStudentList = Paper.book().read(Constants.STUDENT_DB, new ArrayList<Student>());
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
-            if(!isGrid)
-            {
-                setRecycler();
-            }
-            else
-            {
-                setRecyclerGrid();
-            }
-        }
+        startActivityForResult(new Intent(MainActivity.this,AddStudentActivity.class),Constants.RESULT_ADD_STUDENT);
     }
 
 
@@ -180,10 +165,6 @@ public class MainActivity extends AppCompatActivity implements CheckSizeInterfac
         return true;
     }
 
-    /*
-     * method sortByName
-     * To sort rvStudentList items by Student Name
-     */
     private void sortByName() {
         Collections.sort(mStudentList, new Comparator<Student>() {
             @Override
@@ -194,10 +175,7 @@ public class MainActivity extends AppCompatActivity implements CheckSizeInterfac
         mStudentRecycelerAdapter.notifyDataSetChanged();
 
     }
-    /*
-     * method sortById
-     * To sort rvStudentList items by Student Roll No
-     */
+
     private void sortById() {
         Collections.sort(mStudentList, new Comparator<Student>() {
             @Override
@@ -213,4 +191,91 @@ public class MainActivity extends AppCompatActivity implements CheckSizeInterfac
         recyclerView.setVisibility(View.GONE);
         llNodata.setVisibility(View.VISIBLE);
     }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+        if (requestCode == Constants.RESULT_ADD_STUDENT) {
+            if (resultCode == Activity.RESULT_OK) {
+                String result_name = data.getStringExtra(Constants.STUDENT_NAME);
+                int result_id = data.getIntExtra(Constants.STUDENT_ID,-1);
+                Student mStudent  = new Student(result_name,result_id,mStudentList.size()+1);
+
+
+                for(int i = 0; i < mStudentList.size();i++)
+                {
+                    if(mStudentList.get(i).getStudentId() == result_id)
+                    {
+                        isSuccesfullyAdded = false;
+                    }
+                }
+
+                if(!isSuccesfullyAdded)
+                {
+                    isSuccesfullyAdded = true;
+                    Toast.makeText(MainActivity.this,getString(R.string.unique_id_check), Toast.LENGTH_SHORT).show();
+                }
+                else {
+                    if (mStudentList.size() == 0) {
+                        mStudentList.add(mStudent);
+                        if (!isGrid) {
+                            setRecycler();
+                        } else {
+                            setRecyclerGrid();
+                        }
+                    } else {
+                        mStudentList.add(mStudent);
+                        mStudentRecycelerAdapter.notifyDataSetChanged();
+                    }
+                    Toast.makeText(MainActivity.this, getString(R.string.student_updated), Toast.LENGTH_SHORT).show();
+
+                }
+
+            }
+        }
+
+        if(requestCode == Constants.RESULT_EDIT_STUDENT)
+        {
+            if (resultCode == Activity.RESULT_OK) {
+                String result_name = data.getStringExtra(Constants.STUDENT_NAME);
+                int result_id = data.getIntExtra(Constants.STUDENT_ID, -1);
+                int result_id_system = data.getIntExtra(Constants.STUDENT_ID_SYSTEM, -1);
+
+
+                for(int i = 0; i < mStudentList.size();i++)
+                {
+                    if(mStudentList.get(i).getStudentId() == result_id)
+                    {
+                        isSuccesfullyAdded = false;
+                    }
+                }
+
+                if(!isSuccesfullyAdded)
+                {
+                    isSuccesfullyAdded = true;
+                    Toast.makeText(MainActivity.this,getString(R.string.unique_id_check), Toast.LENGTH_SHORT).show();
+                }
+                else {
+
+                    int index = -1;
+                    for (int i = 0; i < mStudentList.size(); i++) {
+                        Student mStudentTemp = mStudentList.get(i);
+                        if (mStudentTemp.getSystemId() == result_id_system) {
+                            index = i;
+                            break;
+                        }
+                    }
+                    Student mStudent = mStudentList.get(index);
+                    mStudent.setStudentName(result_name);
+                    mStudent.setStudentId(result_id);
+
+                    mStudentRecycelerAdapter.notifyDataSetChanged();
+                    Toast.makeText(MainActivity.this, getString(R.string.student_added), Toast.LENGTH_SHORT).show();
+                }
+
+            }
+        }
+    }
+
+
 }

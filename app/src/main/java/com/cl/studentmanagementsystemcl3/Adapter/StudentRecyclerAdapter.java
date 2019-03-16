@@ -21,8 +21,6 @@ import com.cl.studentmanagementsystemcl3.R;
 import java.util.ArrayList;
 import java.util.List;
 
-import io.paperdb.Paper;
-
 public class StudentRecyclerAdapter extends RecyclerView.Adapter<StudentRecyclerAdapter.MyViewHolder> {
 
     private List<Student> studentList;
@@ -87,11 +85,10 @@ public class StudentRecyclerAdapter extends RecyclerView.Adapter<StudentRecycler
         dialog.setTitle(activity.getString(R.string.choose_option));
         dialog.setCancelable(true);
 
-        Paper.init(activity);
-
         dialog.findViewById(R.id.tvView).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                dialog.dismiss();
                 Intent mIntent = new Intent(activity, AddStudentActivity.class);
                 mIntent.putExtra(Constants.STUDENT_OBJECT, mStudent);
                 mIntent.putExtra(Constants.ACTION,Constants.VIEW);
@@ -103,10 +100,11 @@ public class StudentRecyclerAdapter extends RecyclerView.Adapter<StudentRecycler
         dialog.findViewById(R.id.tvEdit).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                dialog.dismiss();
                 Intent mIntent = new Intent(activity, AddStudentActivity.class);
                 mIntent.putExtra(Constants.STUDENT_OBJECT, mStudent);
                 mIntent.putExtra(Constants.ACTION,Constants.EDIT);
-                activity.startActivity(mIntent);
+                activity.startActivityForResult(mIntent,Constants.RESULT_EDIT_STUDENT);
             }
         });
 
@@ -117,7 +115,6 @@ public class StudentRecyclerAdapter extends RecyclerView.Adapter<StudentRecycler
                 studentList.remove(position);
                 notifyItemRemoved(position);
                 notifyItemRangeChanged(position,studentList.size());
-                new deleteFromPaper().execute(position);
                 dialog.dismiss();
                 if(studentList.size() == 0)
                 {
@@ -127,24 +124,6 @@ public class StudentRecyclerAdapter extends RecyclerView.Adapter<StudentRecycler
         });
 
         dialog.show();
-    }
-
-
-    private static class deleteFromPaper extends AsyncTask<Integer, Void, Void> {
-
-        @Override
-        protected Void doInBackground(Integer... position) {
-            ArrayList<Student> existingStudents;
-            existingStudents = Paper.book().read(Constants.STUDENT_DB, new ArrayList<Student>());
-            existingStudents.remove((int)position[0]);
-            Paper.book().write(Constants.STUDENT_DB, existingStudents);
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void result) {
-            super.onPostExecute(result);
-        }
     }
 
 }

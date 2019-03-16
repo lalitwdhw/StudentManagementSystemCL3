@@ -8,4 +8,9 @@ public class Constants {
     public static String VIEW = "view";
     public static String PREFS = "prefs";
     public static String IS_GRID = "is_grid";
-}
+    public static String STUDENT_NAME = "student_name";
+    public static String STUDENT_ID = "student_id";
+    public static String STUDENT_ID_SYSTEM = "student_id_system";
+    public static int RESULT_ADD_STUDENT = 1;
+    public static int RESULT_EDIT_STUDENT = 2;
+ }

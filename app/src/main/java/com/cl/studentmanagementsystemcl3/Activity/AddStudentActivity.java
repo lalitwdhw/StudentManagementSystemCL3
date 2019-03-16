@@ -16,7 +16,6 @@ import com.cl.studentmanagementsystemcl3.R;
 
 import java.util.ArrayList;
 
-import io.paperdb.Paper;
 
 public class AddStudentActivity extends AppCompatActivity {
 
@@ -91,75 +90,13 @@ public class AddStudentActivity extends AppCompatActivity {
             return;
         }
 
-        Paper.init(AddStudentActivity.this);
-        new saveToPaper().execute(etName.getText().toString(),etId.getText().toString());
+        Intent returnIntent = new Intent();
+        returnIntent.putExtra(Constants.STUDENT_NAME,etName.getText().toString().trim());
+        returnIntent.putExtra(Constants.STUDENT_ID,Integer.valueOf(etId.getText().toString().trim()));
+        returnIntent.putExtra(Constants.STUDENT_ID_SYSTEM,editingSystemId);
+        setResult(Activity.RESULT_OK,returnIntent);
+        finish();
     }
 
-    private class saveToPaper extends AsyncTask<String, Void, Void> {
-
-        @Override
-        protected Void doInBackground(String... params) {
-            ArrayList<Student> existingStudents;
-            existingStudents = Paper.book().read(Constants.STUDENT_DB, new ArrayList<Student>());
-            if(!isEditing)
-            {
-                Student mStudent =
-                        new Student(params[0],
-                                Integer.valueOf(params[1]),
-                                existingStudents.size()+1);
-
-                for(int i = 0; i < existingStudents.size();i++)
-                {
-                    if(existingStudents.get(i).getStudentId() == Integer.valueOf(params[1]))
-                    {
-                        isSuccesfullyAdded = false;
-                        return null;
-                    }
-                }
-                existingStudents.add(mStudent);
-                Paper.book().write(Constants.STUDENT_DB,existingStudents);
-            }
-            else
-            {
-                int index = -1;
-                for(int i = 0; i < existingStudents.size();i++)
-                {
-                    Student mStudentTemp = existingStudents.get(i);
-                    if(mStudentTemp.getSystemId() == editingSystemId)
-                    {
-                        index = i;
-                        break;
-                    }
-                }
-                Student mStudent  = existingStudents.get(index);
-                mStudent.setStudentName(params[0]);
-                mStudent.setStudentId(Integer.valueOf(params[1]));
-                Paper.book().write(Constants.STUDENT_DB,existingStudents);
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
-            if(isSuccesfullyAdded) {
-
-                if (!isEditing) {
-                    Toast.makeText(AddStudentActivity.this, getString(R.string.student_added), Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(AddStudentActivity.this, getString(R.string.student_updated), Toast.LENGTH_SHORT).show();
-                }
-
-                Intent intent = new Intent(AddStudentActivity.this, MainActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                startActivity(intent);
-            }
-            else
-            {
-                isSuccesfullyAdded = true;
-                Toast.makeText(AddStudentActivity.this,getString(R.string.unique_id_check), Toast.LENGTH_SHORT).show();
-            }
-        }
-    }
 
 }
