@@ -1,8 +1,12 @@
 package com.cl.studentmanagementsystemcl3.Activity;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -14,10 +18,14 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import com.cl.studentmanagementsystemcl3.Adapter.StudentRecyclerAdapter;
-import com.cl.studentmanagementsystemcl3.CheckSizeInterface;
+import com.cl.studentmanagementsystemcl3.Database.DatabaseIntentService;
+import com.cl.studentmanagementsystemcl3.Database.DatabaseService;
+import com.cl.studentmanagementsystemcl3.RecyclerActivityInterface;
 import com.cl.studentmanagementsystemcl3.Constants;
+import com.cl.studentmanagementsystemcl3.Database.DatabaseHelper;
 import com.cl.studentmanagementsystemcl3.Models.Student;
 import com.cl.studentmanagementsystemcl3.R;
 
@@ -25,9 +33,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
-import io.paperdb.Paper;
-
-public class MainActivity extends AppCompatActivity implements CheckSizeInterface {
+public class MainActivity extends AppCompatActivity implements RecyclerActivityInterface {
 
     private RecyclerView recyclerView;
     private LinearLayout llNodata;
@@ -35,6 +41,11 @@ public class MainActivity extends AppCompatActivity implements CheckSizeInterfac
     private StudentRecyclerAdapter mStudentRecycelerAdapter;
     private boolean isGrid = false;
     private SharedPreferences pref;
+    private String dbWriteMode = "";
+
+    private DatabaseHelper db;
+    Intent intentService;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,15 +56,53 @@ public class MainActivity extends AppCompatActivity implements CheckSizeInterfac
 
         pref = getApplicationContext().getSharedPreferences( Constants.PREFS, 0);
         isGrid = pref.getBoolean(Constants.IS_GRID,false);
+        dbWriteMode = pref.getString(Constants.DB_MODE,Constants.DB_MODE_ASYNC);
+        Toast.makeText(MainActivity.this,dbWriteMode,Toast.LENGTH_SHORT).show();
 
-        Paper.init(MainActivity.this);
-        new readFromPaper().execute();
+        //Paper.init(MainActivity.this);
+        if(dbWriteMode.equals(Constants.DB_MODE_ASYNC))
+        {
+            new readFromPaper().execute();
+        }
+        if(dbWriteMode.equals(Constants.DB_MODE_SERVICE))
+        {
+            intentService = new Intent(MainActivity.this, DatabaseService.class);
+            intentService.putExtra(Constants.ACTION,Constants.SERVICE_READ);
+            startService(intentService);
+        }
+        if(dbWriteMode.equals(Constants.DB_MODE_INTENT_SERVICE))
+        {
+            intentService = new Intent(MainActivity.this, DatabaseIntentService.class);
+            intentService.putExtra(Constants.ACTION,Constants.SERVICE_READ);
+            startService(intentService);
+        }
+
+        LocalBroadcastManager.getInstance(MainActivity.this).registerReceiver(mMessageReceiver, new IntentFilter(Constants.SERVICE_STUDENTS_SEND));
     }
+
+    private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Bundle b = intent.getExtras();
+            mStudentList = b.getParcelableArrayList(Constants.STUDENT_LIST);
+            if(!isGrid)
+            {
+                setRecycler();
+            }
+            else
+            {
+                setRecyclerGrid();
+            }
+        }
+    };
 
     private void init()
     {
         recyclerView = findViewById(R.id.recycler);
         llNodata = findViewById(R.id.llNoData);
+
+        db = new DatabaseHelper(this);
+
     }
 
     private void setRecycler()
@@ -74,7 +123,7 @@ public class MainActivity extends AppCompatActivity implements CheckSizeInterfac
             editor.putBoolean(Constants.IS_GRID,isGrid);
             editor.apply();
 
-            mStudentRecycelerAdapter = new StudentRecyclerAdapter(mStudentList, MainActivity.this,this);
+            mStudentRecycelerAdapter = new StudentRecyclerAdapter(mStudentList, MainActivity.this,this, db);
             RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(MainActivity.this)
             {
                 @Override
@@ -105,7 +154,7 @@ public class MainActivity extends AppCompatActivity implements CheckSizeInterfac
             editor.putBoolean(Constants.IS_GRID,isGrid);
             editor.apply();
 
-            mStudentRecycelerAdapter = new StudentRecyclerAdapter(mStudentList, MainActivity.this,this);
+            mStudentRecycelerAdapter = new StudentRecyclerAdapter(mStudentList, MainActivity.this,this, db);
             RecyclerView.LayoutManager mLayoutManager = new GridLayoutManager(MainActivity.this,2)
             {
                 @Override
@@ -128,7 +177,8 @@ public class MainActivity extends AppCompatActivity implements CheckSizeInterfac
 
         @Override
         protected Void doInBackground(Void... params) {
-            mStudentList = Paper.book().read(Constants.STUDENT_DB, new ArrayList<Student>());
+            mStudentList.clear();
+            mStudentList.addAll(db.getAllStudents());
             return null;
         }
 
@@ -173,6 +223,27 @@ public class MainActivity extends AppCompatActivity implements CheckSizeInterfac
             case R.id.action_sort_name:
                 sortByName();
                 break;
+            case R.id.action_async:
+                dbWriteMode = Constants.DB_MODE_ASYNC;
+                SharedPreferences.Editor editor = pref.edit();
+                editor.putString(Constants.DB_MODE,dbWriteMode);
+                editor.apply();
+                Toast.makeText(MainActivity.this,dbWriteMode,Toast.LENGTH_SHORT).show();
+                break;
+            case R.id.action_service:
+                dbWriteMode = Constants.DB_MODE_SERVICE;
+                SharedPreferences.Editor editorr = pref.edit();
+                editorr.putString(Constants.DB_MODE,dbWriteMode);
+                editorr.apply();
+                Toast.makeText(MainActivity.this,dbWriteMode,Toast.LENGTH_SHORT).show();
+                break;
+            case R.id.action_intent_service:
+                dbWriteMode = Constants.DB_MODE_INTENT_SERVICE;
+                SharedPreferences.Editor editorrr = pref.edit();
+                editorrr.putString(Constants.DB_MODE,dbWriteMode);
+                editorrr.apply();
+                Toast.makeText(MainActivity.this,dbWriteMode,Toast.LENGTH_SHORT).show();
+                break;
             default:
                 break;
         }
@@ -180,10 +251,6 @@ public class MainActivity extends AppCompatActivity implements CheckSizeInterfac
         return true;
     }
 
-    /*
-     * method sortByName
-     * To sort rvStudentList items by Student Name
-     */
     private void sortByName() {
         Collections.sort(mStudentList, new Comparator<Student>() {
             @Override
@@ -194,10 +261,6 @@ public class MainActivity extends AppCompatActivity implements CheckSizeInterfac
         mStudentRecycelerAdapter.notifyDataSetChanged();
 
     }
-    /*
-     * method sortById
-     * To sort rvStudentList items by Student Roll No
-     */
     private void sortById() {
         Collections.sort(mStudentList, new Comparator<Student>() {
             @Override
@@ -212,5 +275,23 @@ public class MainActivity extends AppCompatActivity implements CheckSizeInterfac
     public void sizeZero() {
         recyclerView.setVisibility(View.GONE);
         llNodata.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if(intentService!=null)
+        {
+            stopService(intentService);
+        }
+
+        try {
+            unregisterReceiver(mMessageReceiver);
+        }
+        catch (IllegalArgumentException e)
+        {
+            e.printStackTrace();
+        }
+
     }
 }

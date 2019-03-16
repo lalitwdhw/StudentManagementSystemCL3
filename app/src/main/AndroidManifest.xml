@@ -17,6 +17,23 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <service
+            android:name=".Database.DatabaseService"
+            android:label="@string/app_name"
+            android:exported="true"
+            android:enabled="true"
+            android:stopWithTask="false">
+        </service>
+
+        <service
+            android:name=".Database.DatabaseIntentService"
+            android:label="@string/app_name"
+            android:exported="true"
+            android:enabled="true"
+            android:stopWithTask="false">
+        </service>
+
     </application>
 
 </manifest>

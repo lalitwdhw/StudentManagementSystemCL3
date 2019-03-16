@@ -17,4 +17,7 @@
     <string name="name_check">Name is compulsory</string>
     <string name="id_check">Id is compulsory</string>
     <string name="unique_id_check">Enter Unique ID only</string>
+    <string name="async_task_db">Async Task DB</string>
+    <string name="services_db">Services DB</string>
+    <string name="intent_services_db">Intent Services DB</string>
 </resources>

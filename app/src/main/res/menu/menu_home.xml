@@ -15,4 +15,22 @@
         android:title="@string/sort_by_name"
         app:showAsAction="never" />
 
+
+    <item
+        android:id="@+id/action_async"
+        android:title="@string/async_task_db"
+        app:showAsAction="never" />
+
+
+    <item
+        android:id="@+id/action_service"
+        android:title="@string/services_db"
+        app:showAsAction="never" />
+
+
+    <item
+        android:id="@+id/action_intent_service"
+        android:title="@string/intent_services_db"
+        app:showAsAction="never" />
+
 </menu>

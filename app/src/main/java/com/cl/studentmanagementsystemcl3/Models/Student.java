@@ -11,6 +11,9 @@ public class Student implements Parcelable, Comparable {
     private int systemId;
 
 
+    public Student() {
+    }
+
     public Student(String studentName, int studentId, int systemId) {
         this.studentName = studentName;
         this.studentId = studentId;

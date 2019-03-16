@@ -1,8 +1,12 @@
 package com.cl.studentmanagementsystemcl3.Activity;
 
-import android.app.Activity;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -11,12 +15,13 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.cl.studentmanagementsystemcl3.Constants;
+import com.cl.studentmanagementsystemcl3.Database.DatabaseHelper;
+import com.cl.studentmanagementsystemcl3.Database.DatabaseService;
 import com.cl.studentmanagementsystemcl3.Models.Student;
 import com.cl.studentmanagementsystemcl3.R;
 
 import java.util.ArrayList;
 
-import io.paperdb.Paper;
 
 public class AddStudentActivity extends AppCompatActivity {
 
@@ -26,6 +31,9 @@ public class AddStudentActivity extends AppCompatActivity {
     private boolean isEditing = false;
     private int editingSystemId = -1;
     private boolean isSuccesfullyAdded = true;
+    private DatabaseHelper db;
+
+    private Intent intentService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,6 +67,7 @@ public class AddStudentActivity extends AppCompatActivity {
 
         }
 
+        LocalBroadcastManager.getInstance(AddStudentActivity.this).registerReceiver(mMessageReceiver, new IntentFilter(Constants.SERVICE_STUDENTS_APPENED));
 
         btnSave.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -69,11 +78,20 @@ public class AddStudentActivity extends AppCompatActivity {
 
     }
 
+    private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            startActivity(new Intent(AddStudentActivity.this,MainActivity.class));
+        }
+    };
+
     private void init()
     {
         etId = findViewById(R.id.etId);
         etName = findViewById(R.id.etName);
         btnSave = findViewById(R.id.btnSave);
+
+        db = new DatabaseHelper(this);
     }
 
     public void saveStudentDetails()
@@ -91,16 +109,45 @@ public class AddStudentActivity extends AppCompatActivity {
             return;
         }
 
-        Paper.init(AddStudentActivity.this);
-        new saveToPaper().execute(etName.getText().toString(),etId.getText().toString());
+
+        SharedPreferences pref = getApplicationContext().getSharedPreferences( Constants.PREFS, 0);
+        String dbWriteMode = pref.getString(Constants.DB_MODE,Constants.DB_MODE_ASYNC);
+
+        if(dbWriteMode.equals(Constants.DB_MODE_ASYNC))
+        {
+            new saveToPaper().execute(etName.getText().toString().trim(),etId.getText().toString().trim());
+        }
+        if(dbWriteMode.equals(Constants.DB_MODE_SERVICE))
+        {
+            intentService = new Intent(AddStudentActivity.this, DatabaseService.class);
+            intentService.putExtra(Constants.ACTION,Constants.SERVICE_WRITE);
+            intentService.putExtra(Constants.COLUMN_NAME,etName.getText().toString().trim());
+            intentService.putExtra(Constants.COLUMN_ID,etId.getText().toString().trim());
+            intentService.putExtra(Constants.IS_EDITING,isEditing);
+            intentService.putExtra(Constants.EDITING_SYSTEM_ID,editingSystemId);
+            startService(intentService);
+        }
+        if(dbWriteMode.equals(Constants.DB_MODE_INTENT_SERVICE))
+        {
+            intentService = new Intent(AddStudentActivity.this, DatabaseService.class);
+            intentService.putExtra(Constants.ACTION,Constants.SERVICE_WRITE);
+            intentService.putExtra(Constants.COLUMN_NAME,etName.getText().toString().trim());
+            intentService.putExtra(Constants.COLUMN_ID,etId.getText().toString().trim());
+            intentService.putExtra(Constants.IS_EDITING,isEditing);
+            intentService.putExtra(Constants.EDITING_SYSTEM_ID,editingSystemId);
+            startService(intentService);
+        }
+
     }
 
     private class saveToPaper extends AsyncTask<String, Void, Void> {
 
         @Override
         protected Void doInBackground(String... params) {
+
             ArrayList<Student> existingStudents;
-            existingStudents = Paper.book().read(Constants.STUDENT_DB, new ArrayList<Student>());
+            existingStudents = db.getAllStudents();
+
             if(!isEditing)
             {
                 Student mStudent =
@@ -116,25 +163,33 @@ public class AddStudentActivity extends AppCompatActivity {
                         return null;
                     }
                 }
-                existingStudents.add(mStudent);
-                Paper.book().write(Constants.STUDENT_DB,existingStudents);
+                db.insertStudent(mStudent);
             }
             else
             {
-                int index = -1;
+
                 for(int i = 0; i < existingStudents.size();i++)
                 {
-                    Student mStudentTemp = existingStudents.get(i);
-                    if(mStudentTemp.getSystemId() == editingSystemId)
+                    if(existingStudents.get(i).getStudentId() == Integer.valueOf(params[1]) && existingStudents.get(i).getSystemId() != editingSystemId)
                     {
-                        index = i;
-                        break;
+                        isSuccesfullyAdded = false;
+                        return null;
                     }
                 }
-                Student mStudent  = existingStudents.get(index);
-                mStudent.setStudentName(params[0]);
-                mStudent.setStudentId(Integer.valueOf(params[1]));
-                Paper.book().write(Constants.STUDENT_DB,existingStudents);
+
+
+                    int index = -1;
+                    for (int i = 0; i < existingStudents.size(); i++) {
+                        Student mStudentTemp = existingStudents.get(i);
+                        if (mStudentTemp.getSystemId() == editingSystemId) {
+                            index = i;
+                            break;
+                        }
+                    }
+                    Student mStudent = existingStudents.get(index);
+                    mStudent.setStudentName(params[0]);
+                    mStudent.setStudentId(Integer.valueOf(params[1]));
+                    db.updateStudent(mStudent);
             }
             return null;
         }
@@ -162,4 +217,20 @@ public class AddStudentActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if(intentService!=null)
+        {
+            stopService(intentService);
+        }
+
+        try {
+            unregisterReceiver(mMessageReceiver);
+        }
+        catch (IllegalArgumentException e)
+        {
+            e.printStackTrace();
+        }
+    }
 }
