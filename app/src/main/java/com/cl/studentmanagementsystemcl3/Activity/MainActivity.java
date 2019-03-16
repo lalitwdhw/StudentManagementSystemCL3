@@ -244,7 +244,7 @@ public class MainActivity extends AppCompatActivity implements CheckSizeInterfac
 
                 for(int i = 0; i < mStudentList.size();i++)
                 {
-                    if(mStudentList.get(i).getStudentId() == result_id)
+                    if(mStudentList.get(i).getStudentId() == result_id && mStudentList.get(i).getSystemId() != result_id_system)
                     {
                         isSuccesfullyAdded = false;
                     }
