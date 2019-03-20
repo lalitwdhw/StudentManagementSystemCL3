@@ -1,4 +1,4 @@
-package com.cl.studentmanagementsystemcl3.Activity;
+package com.cl.studentmanagementsystemcl3.Fragments;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -6,47 +6,42 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.content.LocalBroadcastManager;
-import android.support.v4.view.ViewPager;
-import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
+import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.LinearLayout;
-import android.widget.TabHost;
 import android.widget.Toast;
 
+import com.cl.studentmanagementsystemcl3.Activity.AddStudentActivity;
+import com.cl.studentmanagementsystemcl3.Activity.MainActivity;
 import com.cl.studentmanagementsystemcl3.Adapter.StudentRecyclerAdapter;
-import com.cl.studentmanagementsystemcl3.Database.DatabaseIntentService;
-import com.cl.studentmanagementsystemcl3.Database.DatabaseService;
-import com.cl.studentmanagementsystemcl3.Fragments.AddStudentFragment;
-import com.cl.studentmanagementsystemcl3.Fragments.MainFragment;
-import com.cl.studentmanagementsystemcl3.RecyclerActivityInterface;
 import com.cl.studentmanagementsystemcl3.Constants;
 import com.cl.studentmanagementsystemcl3.Database.DatabaseHelper;
+import com.cl.studentmanagementsystemcl3.Database.DatabaseIntentService;
+import com.cl.studentmanagementsystemcl3.Database.DatabaseService;
 import com.cl.studentmanagementsystemcl3.Models.Student;
 import com.cl.studentmanagementsystemcl3.R;
+import com.cl.studentmanagementsystemcl3.RecyclerActivityInterface;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.List;
 
-public class MainActivity extends AppCompatActivity
-       // implements RecyclerActivityInterface
-{
-/*
+public class MainFragment extends Fragment implements RecyclerActivityInterface {
+
     private RecyclerView recyclerView;
     private LinearLayout llNodata;
     private ArrayList<Student> mStudentList = new ArrayList<>();
@@ -56,90 +51,55 @@ public class MainActivity extends AppCompatActivity
     private String dbWriteMode = "";
 
     private DatabaseHelper db;
-    Intent intentService;*/
+    Intent intentService;
 
-    private TabLayout tabLayout;
-    private ViewPager viewPager;
+    Button addButton;
 
+    public MainFragment() {
+        // Required empty public constructor
+    }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main_fragment);
+        setHasOptionsMenu(true);
+    }
 
-       /* init();
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.activity_main, container, false);
 
-        pref = getApplicationContext().getSharedPreferences( Constants.PREFS, 0);
+        init(view);
+
+        pref = getContext().getSharedPreferences( Constants.PREFS, 0);
         isGrid = pref.getBoolean(Constants.IS_GRID,false);
         dbWriteMode = pref.getString(Constants.DB_MODE,Constants.DB_MODE_ASYNC);
-        Toast.makeText(MainActivity.this,dbWriteMode,Toast.LENGTH_SHORT).show();
+        Toast.makeText(getContext(),dbWriteMode,Toast.LENGTH_SHORT).show();
 
-        //Paper.init(MainActivity.this);
         if(dbWriteMode.equals(Constants.DB_MODE_ASYNC))
         {
             new readFromPaper().execute();
         }
         if(dbWriteMode.equals(Constants.DB_MODE_SERVICE))
         {
-            intentService = new Intent(MainActivity.this, DatabaseService.class);
+            intentService = new Intent(getContext(), DatabaseService.class);
             intentService.putExtra(Constants.ACTION,Constants.SERVICE_READ);
-            startService(intentService);
+            getContext().startService(intentService);
         }
         if(dbWriteMode.equals(Constants.DB_MODE_INTENT_SERVICE))
         {
-            intentService = new Intent(MainActivity.this, DatabaseIntentService.class);
+            intentService = new Intent(getContext(), DatabaseIntentService.class);
             intentService.putExtra(Constants.ACTION,Constants.SERVICE_READ);
-            startService(intentService);
+            getContext().startService(intentService);
         }
 
-        LocalBroadcastManager.getInstance(MainActivity.this).registerReceiver(mMessageReceiver, new IntentFilter(Constants.SERVICE_STUDENTS_SEND));
-*/
-        viewPager = findViewById(R.id.viewpager);
-        setupViewPager(viewPager);
+        LocalBroadcastManager.getInstance(getContext()).registerReceiver(mMessageReceiver, new IntentFilter(Constants.SERVICE_STUDENTS_SEND));
 
-        tabLayout = findViewById(R.id.tabs);
-        tabLayout.setupWithViewPager(viewPager);
-
+        return view;
     }
 
-
-    private void setupViewPager(ViewPager viewPager) {
-        ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());
-        adapter.addFragment(new MainFragment(), getString(R.string.main_frag));
-        adapter.addFragment(new AddStudentFragment(), getString(R.string.add_fragment));
-        viewPager.setAdapter(adapter);
-    }
-
-    class ViewPagerAdapter extends FragmentPagerAdapter {
-        private final List<Fragment> mFragmentList = new ArrayList<>();
-        private final List<String> mFragmentTitleList = new ArrayList<>();
-
-        public ViewPagerAdapter(FragmentManager manager) {
-            super(manager);
-        }
-
-        @Override
-        public Fragment getItem(int position) {
-            return mFragmentList.get(position);
-        }
-
-        @Override
-        public int getCount() {
-            return mFragmentList.size();
-        }
-
-        public void addFragment(Fragment fragment, String title) {
-            mFragmentList.add(fragment);
-            mFragmentTitleList.add(title);
-        }
-
-        @Override
-        public CharSequence getPageTitle(int position) {
-            return mFragmentTitleList.get(position);
-        }
-    }
-
- /*   private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
+    private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             Bundle b = intent.getExtras();
@@ -155,12 +115,20 @@ public class MainActivity extends AppCompatActivity
         }
     };
 
-    private void init()
+    private void init(View view)
     {
-        recyclerView = findViewById(R.id.recycler);
-        llNodata = findViewById(R.id.llNoData);
-
-        db = new DatabaseHelper(this);
+        recyclerView = view.findViewById(R.id.recycler);
+        llNodata = view.findViewById(R.id.llNoData);
+        addButton = view.findViewById(R.id.addButton);
+        addButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //addStudent();
+                TabLayout tabs =  getActivity().findViewById(R.id.tabs);
+                tabs.getTabAt(1).select();
+            }
+        });
+        db = new DatabaseHelper(getContext());
 
     }
 
@@ -182,8 +150,8 @@ public class MainActivity extends AppCompatActivity
             editor.putBoolean(Constants.IS_GRID,isGrid);
             editor.apply();
 
-            mStudentRecycelerAdapter = new StudentRecyclerAdapter(mStudentList, MainActivity.this,this, db);
-            RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(MainActivity.this)
+            mStudentRecycelerAdapter = new StudentRecyclerAdapter(mStudentList, getActivity(),this, db);
+            RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getContext())
             {
                 @Override
                 public boolean canScrollVertically() {
@@ -213,8 +181,8 @@ public class MainActivity extends AppCompatActivity
             editor.putBoolean(Constants.IS_GRID,isGrid);
             editor.apply();
 
-            mStudentRecycelerAdapter = new StudentRecyclerAdapter(mStudentList, MainActivity.this,this, db);
-            RecyclerView.LayoutManager mLayoutManager = new GridLayoutManager(MainActivity.this,2)
+            mStudentRecycelerAdapter = new StudentRecyclerAdapter(mStudentList, getActivity(),this, db);
+            RecyclerView.LayoutManager mLayoutManager = new GridLayoutManager(getContext(),2)
             {
                 @Override
                 public boolean canScrollVertically() {
@@ -227,9 +195,9 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    public void addStudent(View view)
+    public void addStudent()
     {
-        startActivity(new Intent(MainActivity.this,AddStudentActivity.class));
+        startActivity(new Intent(getContext(), AddStudentActivity.class));
     }
 
     private class readFromPaper extends AsyncTask<Void, Void, Void> {
@@ -254,20 +222,18 @@ public class MainActivity extends AppCompatActivity
             }
         }
     }
-*/
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.menu_home, menu);
-        return true;
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
     }
+
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_grid_list:
-               /* if(isGrid)
+                if(isGrid)
                 {
                     setRecycler();
                 }
@@ -275,52 +241,41 @@ public class MainActivity extends AppCompatActivity
                 {
                     setRecyclerGrid();
                 }
-                break;*/
-               return false;
-            case R.id.action_sort_id:
-              /*  sortById();
-                break;*/
-
-            return false;
-            case R.id.action_sort_name:
-           /*     sortByName();
                 break;
-*/
-            return false;
+            case R.id.action_sort_id:
+                sortById();
+                break;
+            case R.id.action_sort_name:
+                sortByName();
+                break;
             case R.id.action_async:
-             /*   dbWriteMode = Constants.DB_MODE_ASYNC;
+                dbWriteMode = Constants.DB_MODE_ASYNC;
                 SharedPreferences.Editor editor = pref.edit();
                 editor.putString(Constants.DB_MODE,dbWriteMode);
                 editor.apply();
-                Toast.makeText(MainActivity.this,dbWriteMode,Toast.LENGTH_SHORT).show();
-                break;*/
-
-            return false;
+                Toast.makeText(getContext(),dbWriteMode,Toast.LENGTH_SHORT).show();
+                break;
             case R.id.action_service:
-          /*      dbWriteMode = Constants.DB_MODE_SERVICE;
+                dbWriteMode = Constants.DB_MODE_SERVICE;
                 SharedPreferences.Editor editorr = pref.edit();
                 editorr.putString(Constants.DB_MODE,dbWriteMode);
                 editorr.apply();
-                Toast.makeText(MainActivity.this,dbWriteMode,Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(),dbWriteMode,Toast.LENGTH_SHORT).show();
                 break;
-*/
-            return false;
             case R.id.action_intent_service:
-              /*  dbWriteMode = Constants.DB_MODE_INTENT_SERVICE;
+                dbWriteMode = Constants.DB_MODE_INTENT_SERVICE;
                 SharedPreferences.Editor editorrr = pref.edit();
                 editorrr.putString(Constants.DB_MODE,dbWriteMode);
                 editorrr.apply();
-                Toast.makeText(MainActivity.this,dbWriteMode,Toast.LENGTH_SHORT).show();
-                break;*/
-
-            return false;
+                Toast.makeText(getContext(),dbWriteMode,Toast.LENGTH_SHORT).show();
+                break;
             default:
                 break;
         }
 
         return true;
     }
-/*
+
     private void sortByName() {
         Collections.sort(mStudentList, new Comparator<Student>() {
             @Override
@@ -348,20 +303,56 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    protected void onDestroy() {
+    public void onDestroy() {
         super.onDestroy();
         if(intentService!=null)
         {
-            stopService(intentService);
+            getContext().stopService(intentService);
         }
 
         try {
-            unregisterReceiver(mMessageReceiver);
+            getContext().unregisterReceiver(mMessageReceiver);
         }
         catch (IllegalArgumentException e)
         {
             e.printStackTrace();
         }
 
-    }*/
+    }
+/*
+
+
+    public void refreshFragmentData(Context context)
+    {
+        db = new DatabaseHelper(context);
+
+        pref = context.getSharedPreferences( Constants.PREFS, 0);
+        isGrid = pref.getBoolean(Constants.IS_GRID,false);
+        dbWriteMode = pref.getString(Constants.DB_MODE,Constants.DB_MODE_ASYNC);
+        Toast.makeText(context,dbWriteMode,Toast.LENGTH_SHORT).show();
+
+        if(dbWriteMode.equals(Constants.DB_MODE_ASYNC))
+        {
+            new readFromPaper().execute();
+        }
+        if(dbWriteMode.equals(Constants.DB_MODE_SERVICE))
+        {
+            intentService = new Intent(context, DatabaseService.class);
+            intentService.putExtra(Constants.ACTION,Constants.SERVICE_READ);
+            context.startService(intentService);
+        }
+        if(dbWriteMode.equals(Constants.DB_MODE_INTENT_SERVICE))
+        {
+            intentService = new Intent(context, DatabaseIntentService.class);
+            intentService.putExtra(Constants.ACTION,Constants.SERVICE_READ);
+            context.startService(intentService);
+        }
+
+        LocalBroadcastManager.getInstance(context).registerReceiver(mMessageReceiver, new IntentFilter(Constants.SERVICE_STUDENTS_SEND));
+
+
+    }
+
+*/
+
 }

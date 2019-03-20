@@ -20,4 +20,6 @@
     <string name="async_task_db">Async Task DB</string>
     <string name="services_db">Services DB</string>
     <string name="intent_services_db">Intent Services DB</string>
+    <string name="main_frag">Main Fragment</string>
+    <string name="add_fragment">Add Student Fragment</string>
 </resources>

@@ -15,6 +15,7 @@ import android.widget.TextView;
 
 import com.cl.studentmanagementsystemcl3.Activity.AddStudentActivity;
 import com.cl.studentmanagementsystemcl3.Database.DatabaseHelper;
+import com.cl.studentmanagementsystemcl3.Database.DatabaseIntentService;
 import com.cl.studentmanagementsystemcl3.Database.DatabaseService;
 import com.cl.studentmanagementsystemcl3.RecyclerActivityInterface;
 import com.cl.studentmanagementsystemcl3.Constants;
@@ -140,7 +141,7 @@ public class StudentRecyclerAdapter extends RecyclerView.Adapter<StudentRecycler
                 }
                 if(dbWriteMode.equals(Constants.DB_MODE_INTENT_SERVICE))
                 {
-                    Intent intentService = new Intent(activity, DatabaseService.class);
+                    Intent intentService = new Intent(activity, DatabaseIntentService.class);
                     intentService.putExtra(Constants.ACTION,Constants.SERVICE_DELETE);
                     Bundle b = new Bundle();
                     b.putParcelable(Constants.STUDENT_OBJECT,mStudent);

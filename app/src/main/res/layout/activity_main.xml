@@ -55,7 +55,8 @@
         android:layout_height="@dimen/dimen_100"
         android:onClick="addStudent"
         android:text="@string/add_student"
-        android:background="@color/colorAccent"/>
+        android:background="@color/colorAccent"
+        android:id="@+id/addButton"/>
 
     </LinearLayout>
 
