@@ -248,27 +248,30 @@ public class MainFragment extends Fragment implements RecyclerActivityInterface 
             case R.id.action_sort_name:
                 sortByName();
                 break;
-            case R.id.action_async:
+            case R.id.action_async:/*
                 dbWriteMode = Constants.DB_MODE_ASYNC;
                 SharedPreferences.Editor editor = pref.edit();
                 editor.putString(Constants.DB_MODE,dbWriteMode);
                 editor.apply();
                 Toast.makeText(getContext(),dbWriteMode,Toast.LENGTH_SHORT).show();
-                break;
+                break;*/
+                return false;
             case R.id.action_service:
-                dbWriteMode = Constants.DB_MODE_SERVICE;
+               /* dbWriteMode = Constants.DB_MODE_SERVICE;
                 SharedPreferences.Editor editorr = pref.edit();
                 editorr.putString(Constants.DB_MODE,dbWriteMode);
                 editorr.apply();
                 Toast.makeText(getContext(),dbWriteMode,Toast.LENGTH_SHORT).show();
-                break;
+                break;*/
+               return false;
             case R.id.action_intent_service:
-                dbWriteMode = Constants.DB_MODE_INTENT_SERVICE;
+               /* dbWriteMode = Constants.DB_MODE_INTENT_SERVICE;
                 SharedPreferences.Editor editorrr = pref.edit();
                 editorrr.putString(Constants.DB_MODE,dbWriteMode);
                 editorrr.apply();
                 Toast.makeText(getContext(),dbWriteMode,Toast.LENGTH_SHORT).show();
-                break;
+                break;*/
+               return false;
             default:
                 break;
         }

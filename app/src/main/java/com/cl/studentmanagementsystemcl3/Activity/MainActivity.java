@@ -46,17 +46,18 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity
        // implements RecyclerActivityInterface
 {
-/*
-    private RecyclerView recyclerView;
+  /*  private RecyclerView recyclerView;
     private LinearLayout llNodata;
     private ArrayList<Student> mStudentList = new ArrayList<>();
     private StudentRecyclerAdapter mStudentRecycelerAdapter;
     private boolean isGrid = false;
-    private SharedPreferences pref;
+  */  private SharedPreferences pref;
     private String dbWriteMode = "";
+/*
 
     private DatabaseHelper db;
-    Intent intentService;*/
+    Intent intentService;
+*/
 
     private TabLayout tabLayout;
     private ViewPager viewPager;
@@ -67,14 +68,14 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_fragment);
 
-       /* init();
+       // init();
 
         pref = getApplicationContext().getSharedPreferences( Constants.PREFS, 0);
-        isGrid = pref.getBoolean(Constants.IS_GRID,false);
+      //  isGrid = pref.getBoolean(Constants.IS_GRID,false);
         dbWriteMode = pref.getString(Constants.DB_MODE,Constants.DB_MODE_ASYNC);
-        Toast.makeText(MainActivity.this,dbWriteMode,Toast.LENGTH_SHORT).show();
+      //  Toast.makeText(MainActivity.this,dbWriteMode,Toast.LENGTH_SHORT).show();
 
-        //Paper.init(MainActivity.this);
+     /*   //Paper.init(MainActivity.this);
         if(dbWriteMode.equals(Constants.DB_MODE_ASYNC))
         {
             new readFromPaper().execute();
@@ -90,10 +91,9 @@ public class MainActivity extends AppCompatActivity
             intentService = new Intent(MainActivity.this, DatabaseIntentService.class);
             intentService.putExtra(Constants.ACTION,Constants.SERVICE_READ);
             startService(intentService);
-        }
+        }*/
 
-        LocalBroadcastManager.getInstance(MainActivity.this).registerReceiver(mMessageReceiver, new IntentFilter(Constants.SERVICE_STUDENTS_SEND));
-*/
+//        LocalBroadcastManager.getInstance(MainActivity.this).registerReceiver(mMessageReceiver, new IntentFilter(Constants.SERVICE_STUDENTS_SEND));
         viewPager = findViewById(R.id.viewpager);
         setupViewPager(viewPager);
 
@@ -288,32 +288,31 @@ public class MainActivity extends AppCompatActivity
 */
             return false;
             case R.id.action_async:
-             /*   dbWriteMode = Constants.DB_MODE_ASYNC;
+                dbWriteMode = Constants.DB_MODE_ASYNC;
                 SharedPreferences.Editor editor = pref.edit();
                 editor.putString(Constants.DB_MODE,dbWriteMode);
                 editor.apply();
                 Toast.makeText(MainActivity.this,dbWriteMode,Toast.LENGTH_SHORT).show();
-                break;*/
+                break;
 
-            return false;
+        //    return false;
             case R.id.action_service:
-          /*      dbWriteMode = Constants.DB_MODE_SERVICE;
+                dbWriteMode = Constants.DB_MODE_SERVICE;
                 SharedPreferences.Editor editorr = pref.edit();
                 editorr.putString(Constants.DB_MODE,dbWriteMode);
                 editorr.apply();
                 Toast.makeText(MainActivity.this,dbWriteMode,Toast.LENGTH_SHORT).show();
                 break;
-*/
-            return false;
+         //   return false;
             case R.id.action_intent_service:
-              /*  dbWriteMode = Constants.DB_MODE_INTENT_SERVICE;
+                dbWriteMode = Constants.DB_MODE_INTENT_SERVICE;
                 SharedPreferences.Editor editorrr = pref.edit();
                 editorrr.putString(Constants.DB_MODE,dbWriteMode);
                 editorrr.apply();
                 Toast.makeText(MainActivity.this,dbWriteMode,Toast.LENGTH_SHORT).show();
-                break;*/
+                break;
 
-            return false;
+           // return false;
             default:
                 break;
         }
